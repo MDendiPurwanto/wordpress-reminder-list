@@ -34,3 +34,12 @@ Access the reminder management interface at Dashboard > Reminders.
 
 Display reminders on any page or post using the shortcode:
 
+## Screenshots
+
+### Admin Interface
+![Admin Interface](assets/screenshots/admin-interface.png)
+
+
+[![WordPress Plugin Version](https://img.shields.io/wordpress/plugin/v/reminder-list)](https://wordpress.org/plugins/reminder-list/)
+[![WordPress Plugin Rating](https://img.shields.io/wordpress/plugin/rating/reminder-list)](https://wordpress.org/plugins/reminder-list/)
+[![WordPress Plugin Downloads](https://img.shields.io/wordpress/plugin/dt/reminder-list)](https://wordpress.org/plugins/reminder-list/)
