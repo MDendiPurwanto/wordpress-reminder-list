@@ -1,4 +1,4 @@
-# WordPress Reminder List Plugin
+# Website Reminder List Plugin
 
 A simple WordPress plugin that allows users to create and manage reminders.
 
