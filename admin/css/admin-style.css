@@ -1,0 +1,59 @@
+/* Tambahan CSS untuk admin */
+.reminder-list-container {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.reminder-form {
+    flex: 0 0 30%;
+    margin-right: 5%;
+    background: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.reminder-list {
+    flex: 0 0 65%;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input[type="text"],
+.form-group input[type="datetime-local"],
+.form-group textarea {
+    width: 100%;
+    padding: 8px;
+}
+
+.form-group textarea {
+    height: 100px;
+}
+
+tr.updating {
+    opacity: 0.5;
+}
+
+#form-messages {
+    margin-top: 15px;
+}
+
+@media screen and (max-width: 782px) {
+    .reminder-form, .reminder-list {
+        flex: 0 0 100%;
+        margin-right: 0;
+    }
+    
+    .reminder-list {
+        margin-top: 20px;
+    }
+}

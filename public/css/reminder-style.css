@@ -1,0 +1,62 @@
+/* Add these styles to your existing CSS */
+
+.reminder-item.overdue {
+    border-left: 4px solid #dc3545;
+}
+
+.reminder-item.due-now {
+    border-left: 4px solid #ffc107;
+}
+
+.reminder-item.completed {
+    border-left: 4px solid #28a745;
+}
+
+.reminder-item.updating {
+    opacity: 0.7;
+}
+
+.reminder-actions {
+    margin-top: 10px;
+}
+
+.reminder-actions button {
+    padding: 5px 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.reminder-actions .mark-complete:hover {
+    background-color: #28a745;
+    color: white;
+}
+
+.reminder-actions .mark-pending:hover {
+    background-color: #ffc107;
+}
+
+.due-date-relative {
+    font-style: italic;
+    margin-left: 10px;
+}
+
+#reminder-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    border-radius: 4px;
+    color: white;
+    z-index: 9999;
+    display: none;
+}
+
+#reminder-notification.success {
+    background-color: #28a745;
+}
+
+#reminder-notification.error {
+    background-color: #dc3545;
+}
