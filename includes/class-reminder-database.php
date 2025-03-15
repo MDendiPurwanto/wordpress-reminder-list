@@ -2,13 +2,13 @@
 /**
  * Database operations for Reminder List
  */
-class Reminder_Database {
+class RL_Database {
 
     private $table_name;
     
     public function __construct() {
         global $wpdb;
-        $this->table_name = $wpdb->prefix . 'reminder_list';
+        $this->table_name = $wpdb->prefix . 'rl_reminders';
     }
     
     public function create_tables() {
@@ -36,8 +36,9 @@ class Reminder_Database {
         // Periksa apakah tabel sudah ada
         $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
         error_log('Table exists: ' . ($table_exists ? 'Yes' : 'No'));
+        
+        return $table_exists;
     }
-    
     
     public function get_reminders() {
         global $wpdb;

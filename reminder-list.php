@@ -12,57 +12,52 @@ if (!defined('WPINC')) {
     die;
 }
 
-define('REMINDER_LIST_VERSION', '1.0.0');
-define('REMINDER_LIST_PLUGIN_DIR', plugin_dir_path(__FILE__));
-define('REMINDER_LIST_PLUGIN_URL', plugin_dir_url(__FILE__));
-
-// Aktifkan debugging jika diperlukan
-// define('WP_DEBUG', true);
-// define('WP_DEBUG_LOG', true);
-// define('WP_DEBUG_DISPLAY', false);
+define('RL_VERSION', '1.0.0');
+define('RL_PLUGIN_DIR', plugin_dir_path(__FILE__));
+define('RL_PLUGIN_URL', plugin_dir_url(__FILE__));
 
 // Include the core classes
-require_once REMINDER_LIST_PLUGIN_DIR . 'includes/class-reminder-database.php';
-require_once REMINDER_LIST_PLUGIN_DIR . 'includes/class-reminder-list.php';
+require_once RL_PLUGIN_DIR . 'includes/class-rl-database.php';
+require_once RL_PLUGIN_DIR . 'includes/class-rl-main.php';
 
 // Tambahkan handler untuk test AJAX
-add_action('wp_ajax_test_ajax', 'handle_test_ajax');
+add_action('wp_ajax_rl_test_ajax', 'rl_handle_test_ajax');
 
 /**
  * Handler untuk test AJAX
  */
-function handle_test_ajax() {
+function rl_handle_test_ajax() {
     wp_send_json_success('AJAX is working!');
 }
 
 // Activation hook
-function activate_reminder_list() {
-    $database = new Reminder_Database();
+function rl_activate_plugin() {
+    $database = new RL_Database();
     $database->create_tables();
     
     // Tambahkan log aktivasi untuk debugging
     error_log('Reminder List plugin activated');
 }
-register_activation_hook(__FILE__, 'activate_reminder_list');
+register_activation_hook(__FILE__, 'rl_activate_plugin');
 
 // Deactivation hook
-function deactivate_reminder_list() {
+function rl_deactivate_plugin() {
     // Cleanup if needed
     error_log('Reminder List plugin deactivated');
 }
-register_deactivation_hook(__FILE__, 'deactivate_reminder_list');
+register_deactivation_hook(__FILE__, 'rl_deactivate_plugin');
 
 // Tambahkan hook untuk menangani AJAX di admin dan frontend
-add_action('wp_ajax_add_reminder', 'handle_add_reminder_ajax');
-add_action('wp_ajax_update_reminder', 'handle_update_reminder_ajax');
-add_action('wp_ajax_delete_reminder', 'handle_delete_reminder_ajax');
+add_action('wp_ajax_rl_add_reminder', 'rl_handle_add_reminder_ajax');
+add_action('wp_ajax_rl_update_reminder', 'rl_handle_update_reminder_ajax');
+add_action('wp_ajax_rl_delete_reminder', 'rl_handle_delete_reminder_ajax');
 
 /**
  * Handle AJAX request untuk menambahkan reminder
  */
-function handle_add_reminder_ajax() {
+function rl_handle_add_reminder_ajax() {
     // Verifikasi nonce untuk keamanan
-    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'reminder_nonce')) {
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'rl_reminder_nonce')) {
         wp_send_json_error('Security check failed');
         return;
     }
@@ -88,7 +83,7 @@ function handle_add_reminder_ajax() {
     error_log('Adding reminder via AJAX: ' . $title . ' - ' . $due_date);
     
     // Tambahkan reminder ke database
-    $db = new Reminder_Database();
+    $db = new RL_Database();
     $result = $db->add_reminder($title, $description, $due_date);
     
     if ($result) {
@@ -101,9 +96,9 @@ function handle_add_reminder_ajax() {
 /**
  * Handle AJAX request untuk mengupdate reminder
  */
-function handle_update_reminder_ajax() {
+function rl_handle_update_reminder_ajax() {
     // Verifikasi nonce untuk keamanan
-    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'reminder_nonce')) {
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'rl_reminder_nonce')) {
         wp_send_json_error('Security check failed');
         return;
     }
@@ -140,7 +135,7 @@ function handle_update_reminder_ajax() {
     }
     
     // Update reminder di database
-    $db = new Reminder_Database();
+    $db = new RL_Database();
     $result = $db->update_reminder($id, $data);
     
     if ($result !== false) {
@@ -153,9 +148,9 @@ function handle_update_reminder_ajax() {
 /**
  * Handle AJAX request untuk menghapus reminder
  */
-function handle_delete_reminder_ajax() {
+function rl_handle_delete_reminder_ajax() {
     // Verifikasi nonce untuk keamanan
-    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'reminder_nonce')) {
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'rl_reminder_nonce')) {
         wp_send_json_error('Security check failed');
         return;
     }
@@ -175,7 +170,7 @@ function handle_delete_reminder_ajax() {
     $id = intval($_POST['id']);
     
     // Hapus reminder dari database
-    $db = new Reminder_Database();
+    $db = new RL_Database();
     $result = $db->delete_reminder($id);
     
     if ($result) {
@@ -186,8 +181,8 @@ function handle_delete_reminder_ajax() {
 }
 
 // Start the plugin
-function run_reminder_list() {
-    $plugin = new Reminder_List();
+function rl_init_plugin() {
+    $plugin = new RL_Main();
     $plugin->run();
 }
-run_reminder_list();
+rl_init_plugin();

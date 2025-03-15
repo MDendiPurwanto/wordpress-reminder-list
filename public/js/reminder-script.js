@@ -1,82 +1,80 @@
 /**
- * Front-end JavaScript for Reminder List plugin
+ * Frontend JavaScript untuk Reminder List
  */
 (function($) {
     'use strict';
 
-    // Initialize when document is ready
+    // Inisialisasi ketika dokumen siap
     $(document).ready(function() {
-        initReminderList();
+        rl_initReminderList();
     });
 
     /**
-     * Initialize the reminder list functionality
+     * Inisialisasi fungsi reminder list
      */
-    function initReminderList() {
-        // Handle marking reminders as complete
-        $('.reminder-item .mark-complete').on('click', function(e) {
-            e.preventDefault();
+    function rl_initReminderList() {
+        // Update tampilan waktu relatif
+        rl_updateDueDateDisplay();
+        
+        // Set interval untuk update waktu relatif setiap menit
+        setInterval(rl_updateDueDateDisplay, 60000);
+        
+        // Handle tombol mark complete
+        $('.rl-reminder-item .rl-mark-complete').on('click', function() {
+            var id = $(this).data('id');
+            var $item = $(this).closest('.rl-reminder-item');
             
-            var $item = $(this).closest('.reminder-item');
-            var reminderId = $item.data('id');
-            
-            updateReminderStatus(reminderId, 'completed', $item);
+            rl_updateReminderStatus(id, 'completed', $item);
         });
         
-        // Handle marking reminders as pending
-        $('.reminder-item .mark-pending').on('click', function(e) {
-            e.preventDefault();
+        // Handle tombol mark pending
+        $('.rl-reminder-item .rl-mark-pending').on('click', function() {
+            var id = $(this).data('id');
+            var $item = $(this).closest('.rl-reminder-item');
             
-            var $item = $(this).closest('.reminder-item');
-            var reminderId = $item.data('id');
-            
-            updateReminderStatus(reminderId, 'pending', $item);
+            rl_updateReminderStatus(id, 'pending', $item);
         });
-        
-        // Initialize any date-related displays
-        updateDueDateDisplay();
-        
-        // Set up periodic refresh for time-sensitive elements
-        setInterval(updateDueDateDisplay, 60000); // Update every minute
     }
     
     /**
-     * Update the status of a reminder via AJAX
+     * Update status reminder via AJAX
      */
-    function updateReminderStatus(reminderId, status, $item) {
+    function rl_updateReminderStatus(id, status, $item) {
         $.ajax({
-            url: reminder_ajax.ajax_url,
+            url: rl_ajax.ajax_url,
             type: 'POST',
             data: {
-                action: 'update_reminder',
-                id: reminderId,
+                action: 'rl_update_reminder',
+                id: id,
                 status: status,
-                nonce: reminder_ajax.nonce
+                nonce: rl_ajax.nonce
             },
             beforeSend: function() {
                 $item.addClass('updating');
             },
             success: function(response) {
                 if (response.success) {
+                    // Update class dan tampilan
                     $item.removeClass('pending completed').addClass(status);
                     
-                    // Update button visibility
+                    // Update tombol
                     if (status === 'completed') {
-                        $item.find('.mark-complete').hide();
-                        $item.find('.mark-pending').show();
+                        $item.find('.rl-mark-complete').replaceWith('<button class="rl-mark-pending" data-id="' + id + '">Mark Pending</button>');
                     } else {
-                        $item.find('.mark-complete').show();
-                        $item.find('.mark-pending').hide();
+                        $item.find('.rl-mark-pending').replaceWith('<button class="rl-mark-complete" data-id="' + id + '">Mark Complete</button>');
                     }
                     
-                    // Optional: Show success message
-                    showNotification('Reminder updated successfully!', 'success');
+                    // Reinisialisasi event handlers
+                    rl_initReminderList();
+                    
+                    // Tampilkan notifikasi
+                    rl_showNotification('Reminder updated successfully!', 'success');
                 } else {
-                    showNotification('Failed to update reminder: ' + response.data, 'error');
+                    rl_showNotification('Failed to update reminder', 'error');
                 }
             },
             error: function() {
-                showNotification('Server error occurred. Please try again.', 'error');
+                rl_showNotification('Server error occurred', 'error');
             },
             complete: function() {
                 $item.removeClass('updating');
@@ -85,75 +83,71 @@
     }
     
     /**
-     * Update the display of due dates (e.g., "2 hours ago", "in 3 days")
+     * Update tampilan waktu relatif
      */
-    function updateDueDateDisplay() {
-        $('.reminder-item').each(function() {
+    function rl_updateDueDateDisplay() {
+        $('.rl-reminder-item').each(function() {
             var $item = $(this);
             var dueDate = new Date($item.data('due-date'));
             var now = new Date();
             
-            // Skip if no due date
-            if (!$item.data('due-date')) {
-                return;
-            }
-            
-            // Calculate time difference
+            // Hitung selisih waktu
             var diff = dueDate - now;
             var diffDays = Math.floor(diff / (1000 * 60 * 60 * 24));
             var diffHours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             var diffMinutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             
-            var $dueDateDisplay = $item.find('.due-date-relative');
+            var $dueDateRelative = $item.find('.rl-due-date-relative');
             
-            // Format the relative time
+            // Format waktu relatif
             if (diff < 0) {
-                // Past due
+                // Sudah lewat
                 if (diffDays < -1) {
-                    $dueDateDisplay.text('Overdue by ' + Math.abs(diffDays) + ' days');
+                    $dueDateRelative.text('(Overdue by ' + Math.abs(diffDays) + ' days)');
                 } else if (diffHours < -1) {
-                    $dueDateDisplay.text('Overdue by ' + Math.abs(diffHours) + ' hours');
+                    $dueDateRelative.text('(Overdue by ' + Math.abs(diffHours) + ' hours)');
+                } else if (diffMinutes < -1) {
+                    $dueDateRelative.text('(Overdue by ' + Math.abs(diffMinutes) + ' minutes)');
                 } else {
-                    $dueDateDisplay.text('Overdue by ' + Math.abs(diffMinutes) + ' minutes');
+                    $dueDateRelative.text('(Overdue just now)');
                 }
                 
-                // Add overdue class if not already present
-                if (!$item.hasClass('overdue')) {
+                // Tambahkan class overdue
+                if (!$item.hasClass('overdue') && !$item.hasClass('completed')) {
                     $item.addClass('overdue');
                 }
             } else {
-                // Upcoming
+                // Belum lewat
                 if (diffDays > 1) {
-                    $dueDateDisplay.text('Due in ' + diffDays + ' days');
+                    $dueDateRelative.text('(Due in ' + diffDays + ' days)');
+                } else if (diffDays === 1) {
+                    $dueDateRelative.text('(Due tomorrow)');
                 } else if (diffHours > 1) {
-                    $dueDateDisplay.text('Due in ' + diffHours + ' hours');
+                    $dueDateRelative.text('(Due in ' + diffHours + ' hours)');
                 } else if (diffMinutes > 1) {
-                    $dueDateDisplay.text('Due in ' + diffMinutes + ' minutes');
+                    $dueDateRelative.text('(Due in ' + diffMinutes + ' minutes)');
                 } else {
-                    $dueDateDisplay.text('Due now');
-                    
-                    // Add due-now class
-                    $item.addClass('due-now');
+                    $dueDateRelative.text('(Due now)');
                 }
             }
         });
     }
     
     /**
-     * Display a notification message
+     * Tampilkan notifikasi
      */
-    function showNotification(message, type) {
-        // Create notification element if it doesn't exist
-        if ($('#reminder-notification').length === 0) {
-            $('body').append('<div id="reminder-notification"></div>');
+    function rl_showNotification(message, type) {
+        // Buat elemen notifikasi jika belum ada
+        if ($('#rl-notification').length === 0) {
+            $('body').append('<div id="rl-notification"></div>');
         }
         
-        var $notification = $('#reminder-notification');
+        var $notification = $('#rl-notification');
         
-        // Set message and type
+        // Set pesan dan tipe
         $notification.text(message).attr('class', type);
         
-        // Show notification
+        // Tampilkan notifikasi
         $notification.fadeIn(300).delay(3000).fadeOut(500);
     }
 
